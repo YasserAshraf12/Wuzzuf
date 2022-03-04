@@ -1,10 +1,10 @@
 package org.iti.wuzzuf.DAO;
 
-import org.apache.spark.sql.DataFrameReader;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
 import org.iti.wuzzuf.POJO.Job;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
+import org.knowm.xchart.SwingWrapper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JobDaoImpl implements JobDao{
+
+    final SparkSession sparkSession = SparkSession.builder().appName("Wuzzuf Spark Demo").master("local[3]")
+            .getOrCreate();
 
     @Override
     public List<Job> readJobs(String filePath) {
@@ -45,8 +48,6 @@ public class JobDaoImpl implements JobDao{
 
     @Override
     public Dataset<Row> readCSVFileSpark(String filePath) {
-        final SparkSession sparkSession = SparkSession.builder().appName("Wuzzuf Spark Demo").master("local[3]")
-        .getOrCreate();
 
         final DataFrameReader dataFrameReader = sparkSession.read ();
 
@@ -83,6 +84,28 @@ public class JobDaoImpl implements JobDao{
 
     @Override
     public void countJobsForCompany(Dataset<Row> data) {
-        data.groupBy("Company").count().foreach(x -> System.out.println(x));
+
+        data.createOrReplaceTempView ("Jobs_Data");
+
+        SQLContext sqlContext = sparkSession.sqlContext();
+        sqlContext.sql("select Company, count(*) as Number_Of_Jobs from Jobs_Data group by Company order by Number_Of_Jobs desc").show(10);
     }
+
+    @Override
+    public void piePlot(Dataset<Row> data) {
+        PieChart chart = new PieChartBuilder().width(800).height(600).title(getClass().getSimpleName()).build();
+
+        data.createOrReplaceTempView ("Jobs_Data");
+
+        SQLContext sqlContext = sparkSession.sqlContext();
+        Dataset<Row> dt = sparkSession.sql("select Company, count(*) as Number_of_jobs from Jobs_Data " +
+                "group by Company order by Number_of_jobs desc limit 5");
+
+
+        dt.foreach(row -> { chart.addSeries((String) row.get(0), (int)row.get(1)); });
+
+        new SwingWrapper<PieChart>(chart).displayChart();
+    }
+
+
 }
