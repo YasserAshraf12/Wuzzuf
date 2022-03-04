@@ -6,21 +6,26 @@ import org.apache.spark.sql.Row;
 import org.iti.wuzzuf.DAO.JobDao;
 import org.iti.wuzzuf.DAO.JobDaoImpl;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
+
 public class App {
 
 
     public static void main(String[] args) {
 
+        Logger.getLogger("org").setLevel(Level.OFF);
+        Logger.getLogger("akka").setLevel(Level.OFF);
+
         JobDao jobDao = new JobDaoImpl();
         String fileName = "C:\\Users\\Top\\Desktop\\Wuzzuf_JavaML\\my-wuzzuf-project\\src\\main\\resources\\Wuzzuf_Jobs.csv";
-        //List<Job> jobs = jobDao.readJobs(fileName);
-
-        /*for(Job j : jobs){
-            System.out.println(j.toString());
-        }*/
 
         Dataset<Row> df =  jobDao.readCSVFileSpark(fileName);
-        jobDao.countJobsForCompany(df);
+        //jobDao.countJobsForCompany(df);
+
+        jobDao.piePlot(df);
+
 
     }
 }
