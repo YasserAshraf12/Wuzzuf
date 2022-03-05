@@ -24,7 +24,10 @@ public class App {
         Dataset<Row> df =  jobDao.readCSVFileSpark(fileName);
         //jobDao.countJobsForCompany(df);
 
-        jobDao.piePlot(df);
+        //jobDao.piePlot(df);
+
+        //jobDao.getMostPopularTitles(df);
+        jobDao.barPlot(df);
 
 
     }
