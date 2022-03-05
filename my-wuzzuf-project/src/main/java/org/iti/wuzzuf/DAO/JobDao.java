@@ -17,4 +17,7 @@ public interface JobDao {
     Dataset<Row> dropDuplicates(Dataset<Row> data);
     void countJobsForCompany(Dataset<Row> data);
     void piePlot(Dataset<Row> data);
+    void getMostPopularTitles(Dataset<Row> data);
+    void barPlot(Dataset<Row> data);
+
 }

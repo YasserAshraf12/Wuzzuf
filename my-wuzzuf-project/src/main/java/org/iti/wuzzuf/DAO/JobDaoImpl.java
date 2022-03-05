@@ -2,14 +2,14 @@ package org.iti.wuzzuf.DAO;
 
 import org.apache.spark.sql.*;
 import org.iti.wuzzuf.POJO.Job;
-import org.knowm.xchart.PieChart;
-import org.knowm.xchart.PieChartBuilder;
-import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.*;
+import org.knowm.xchart.style.Styler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class JobDaoImpl implements JobDao{
 
@@ -93,18 +93,59 @@ public class JobDaoImpl implements JobDao{
 
     @Override
     public void piePlot(Dataset<Row> data) {
-        PieChart chart = new PieChartBuilder().width(800).height(600).title(getClass().getSimpleName()).build();
+        PieChart chart = new PieChartBuilder().width(800).height(600).title("Pie Chart").build();
 
         data.createOrReplaceTempView ("Jobs_Data");
 
         SQLContext sqlContext = sparkSession.sqlContext();
-        Dataset<Row> dt = sparkSession.sql("select Company, count(*) as Number_of_jobs from Jobs_Data " +
-                "group by Company order by Number_of_jobs desc limit 5");
+        Dataset<Row> dt= sparkSession.sql("select cast(Company as string), cast(count(*) as int) as Number_of_jobs from Jobs_Data " +
+                "group by Company order by Number_of_jobs desc limit 10");
 
 
-        dt.foreach(row -> { chart.addSeries((String) row.get(0), (int)row.get(1)); });
+        List<Row> companies =dt.select("Company").collectAsList();
+        List<Row> counts =dt.select("Number_of_jobs").collectAsList();
+
+        for (int i = 0; i < companies.size(); i++) {
+            chart.addSeries(companies.get(i).getString(0), counts.get(i).getInt(0));
+        }
 
         new SwingWrapper<PieChart>(chart).displayChart();
+    }
+
+    @Override
+    public void getMostPopularTitles(Dataset<Row> data) {
+        data.createOrReplaceTempView ("Jobs_Data");
+        SQLContext sqlContext = sparkSession.sqlContext();
+        sqlContext.sql("select Title, count(*) as Number_of_title from Jobs_Data group by Title order by Number_of_title desc").show(10);
+    }
+
+    @Override
+    public void barPlot(Dataset<Row> data) {
+
+        CategoryChart chart = new CategoryChartBuilder().width(800).height(600).title("Histogram").xAxisTitle("Title").yAxisTitle("Frequency").build();
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
+        chart.getStyler().setHasAnnotations(true);
+
+        data.createOrReplaceTempView ("Jobs_Data");
+
+        SQLContext sqlContext = sparkSession.sqlContext();
+        Dataset<Row> dt= sparkSession.sql("select cast(Title as string), cast(count(*) as int) as Number_of_title from Jobs_Data " +
+                "group by Title order by Number_of_title desc limit 10");
+
+        List<Row> temp_titles =dt.select("Title").collectAsList();
+        List<Row> temp_counts =dt.select("Number_of_title").collectAsList();
+
+        List<String> titles = new ArrayList<>();
+        List<Integer> frequency = new ArrayList<>();
+
+        for (int i = 0; i < temp_titles.size(); i++) {
+            titles.add(temp_titles.get(i).getString(0));
+            frequency.add(temp_counts.get(i).getInt(0));
+        }
+
+        chart.addSeries("Titles", titles, frequency);
+
+        new SwingWrapper<CategoryChart>(chart).displayChart();
     }
 
 
