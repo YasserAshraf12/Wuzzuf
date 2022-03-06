@@ -27,7 +27,10 @@ public class App {
         //jobDao.piePlot(df);
 
         //jobDao.getMostPopularTitles(df);
-        jobDao.barPlot(df);
+        //jobDao.barPlot(df);
+        //jobDao.getMostPopularAreas(df);
+        //jobDao.barPlotAreas(df);
+        //jobDao.mostRequiredSkill(df);
 
 
     }
