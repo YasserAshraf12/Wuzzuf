@@ -19,5 +19,7 @@ public interface JobDao {
     void piePlot(Dataset<Row> data);
     void getMostPopularTitles(Dataset<Row> data);
     void barPlot(Dataset<Row> data);
-
+    void getMostPopularAreas(Dataset<Row> data);
+    void barPlotAreas(Dataset<Row> data);
+    void mostRequiredSkill(Dataset<Row> data);
 }
