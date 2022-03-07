@@ -1,33 +1,36 @@
 package org.iti.wuzzuf.DAO;
 
 import org.apache.spark.sql.*;
+import org.iti.wuzzuf.POJO.Group;
 import org.iti.wuzzuf.POJO.Job;
+import org.iti.wuzzuf.POJO.Summary;
 import org.knowm.xchart.*;
 import org.knowm.xchart.style.Styler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-@RequestMapping("/job")
-@Controller
+@Component
 public class JobDaoImpl implements JobDao{
 
-    public  final String filePath = "C:\\Users\\Top\\Desktop\\my-wuzzuf-project\\src\\main\\resources\\static\\Wuzzuf_Jobs.csv";
+    private final String filePath = "C:\\Users\\Top\\Desktop\\Wuzzuf_JavaML\\my wuzzuf-project-spring-version\\my-wuzzuf-project\\src\\main\\resources\\static\\Wuzzuf_Jobs.csv";
 
-    @Autowired
-    private SparkSession sparkSession;
+    private Dataset<Row> data = null;
+
+    private SparkSession sparkSession = SparkSession.builder().appName ("Wuzzuf Jobs Demo").master("local[5]").getOrCreate();
+
+    public JobDaoImpl(){
+        DataFrameReader dataFrameReader = sparkSession.read();
+        dataFrameReader.option("header", true);
+        this.data = dataFrameReader.csv(this.filePath);
+    }
 
     @Override
-    @RequestMapping(value="/readJobs", method=RequestMethod.GET)
-    public ResponseEntity<List<Job>> readJobs() {
+    public List<Job> readJobs() {
 
         List<Job> jobs = new ArrayList<>();
 
@@ -53,61 +56,58 @@ public class JobDaoImpl implements JobDao{
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
-        return new ResponseEntity<>(jobs, HttpStatus.OK);
+        return jobs;
     }
 
     @Override
-    public Dataset<Row> readCSVFileSpark(String filePath) {
-
-        final DataFrameReader dataFrameReader = sparkSession.read ();
-
-        dataFrameReader.option ("header", "true");
-        final Dataset<Row> csvDataFrame = dataFrameReader.csv (filePath);
-
-        return csvDataFrame;
+    public List<Summary> getDataSummary() {
+        List<Summary> summaries = data.describe().as(Encoders.bean(Summary.class)).collectAsList();
+        return summaries;
     }
 
     @Override
-    @RequestMapping(value="/getSummary", method=RequestMethod.GET)
-    public Dataset<Row> getDataSummary() {
-
-        final DataFrameReader dataFrameReader = sparkSession.read ();
-        dataFrameReader.option ("header", "true");
-        final Dataset<Row> data = dataFrameReader.csv (filePath);
-
-        return data;
-    }
-
-    @Override
-    public void showStructure(Dataset<Row> data) {
+    public void showStructure() {
         data.printSchema();
     }
 
     @Override
-    public void printDataTabular(Dataset<Row> data, int n) {
-        data.show(10);
+    public List<Job> printDataTabular() {
+        List<Job> df = data.as(Encoders.bean(Job.class)).collectAsList();
+        return df;
     }
 
     @Override
-    public Dataset<Row> dropNullValues(Dataset<Row> data) {
-        return data.na().drop("any");
+    public List<Job> dropNullValues() {
+        return data.na().drop("any").as(Encoders.bean(Job.class)).collectAsList();
     }
 
     @Override
-    public Dataset<Row> dropDuplicates(Dataset<Row> data) {
-        return data.dropDuplicates();
+    public List<Job> dropDuplicates() {
+        return data.dropDuplicates().as(Encoders.bean(Job.class)).collectAsList();
     }
 
     @Override
-    public void countJobsForCompany(Dataset<Row> data) {
+    public List<Group> countJobsForCompany() {
 
         data.createOrReplaceTempView ("Jobs_Data");
+        Dataset<Row> df =  sparkSession.sql("select Company as company, count(*) as frequency from Jobs_Data group by company order by frequency desc");
 
-        sparkSession.sql("select Company, count(*) as Number_Of_Jobs from Jobs_Data group by Company order by Number_Of_Jobs desc").show(10);
+        System.out.println(df.count());
+        df.show((int)df.count());
+
+        List<Group> groups = new ArrayList<>();
+
+        Iterator<Row> it = df.toLocalIterator();
+        while (it.hasNext())
+        {
+            Row g = it.next();
+            groups.add(new Group(g.getString(0), g.getLong(1)));
+        }
+        return groups;
     }
 
     @Override
-    public void piePlot(Dataset<Row> data) {
+    public void piePlot() {
         PieChart chart = new PieChartBuilder().width(800).height(600).title("Pie Chart").build();
 
         data.createOrReplaceTempView ("Jobs_Data");
@@ -127,14 +127,14 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public void getMostPopularTitles(Dataset<Row> data) {
+    public void getMostPopularTitles() {
 
         data.createOrReplaceTempView ("Jobs_Data");
         sparkSession.sql("select Title, count(*) as Number_of_title from Jobs_Data group by Title order by Number_of_title desc").show(10);
     }
 
     @Override
-    public void barPlot(Dataset<Row> data) {
+    public void barPlot() {
 
         CategoryChart chart = new CategoryChartBuilder().width(1700).height(800).title("Histogram").xAxisTitle("Title").yAxisTitle("Frequency").build();
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
@@ -163,13 +163,13 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public void getMostPopularAreas(Dataset<Row> data) {
+    public void getMostPopularAreas() {
         data.createOrReplaceTempView ("Jobs_Data");
         sparkSession.sql("select Location, count(*) as Number_of_area from Jobs_Data group by Location order by Number_of_area desc").show(10);
     }
 
     @Override
-    public void barPlotAreas(Dataset<Row> data) {
+    public void barPlotAreas() {
         CategoryChart chart = new CategoryChartBuilder().width(1700).height(800).title("Histogram").xAxisTitle("Location").yAxisTitle("Frequency").build();
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
         chart.getStyler().setHasAnnotations(true);
@@ -197,7 +197,7 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public void mostRequiredSkill(Dataset<Row> data) {
+    public void mostRequiredSkill() {
 
         data.createOrReplaceTempView ("Jobs_Data");
         List<Row> dt = sparkSession.sql("select Skills from Jobs_Data").collectAsList();
@@ -218,5 +218,4 @@ public class JobDaoImpl implements JobDao{
 
         result.show((int) result.count());
     }
-
 }
