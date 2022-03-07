@@ -12,8 +12,8 @@ public class Group {
                 '}';
     }
 
-    public Group(String company, long frequency) {
-        this.alias = company;
+    public Group(String alias, long frequency) {
+        this.alias = alias;
         this.frequency = frequency;
     }
 
