@@ -100,4 +100,6 @@ public class JobController {
     @GetMapping("/countSkills")
     public List<Group> mostRequiredSkill() { return JobService.mostRequiredSkill(); }
 
+
+
 }
