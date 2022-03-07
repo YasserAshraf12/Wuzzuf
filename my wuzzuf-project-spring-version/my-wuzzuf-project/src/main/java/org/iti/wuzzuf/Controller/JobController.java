@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 
@@ -21,8 +22,15 @@ import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 @RestController
 @RequestMapping("/job")
 public class JobController {
+
     @Autowired
     private  JobDaoImpl JobService;
+
+    @GetMapping({"/", "/job"})
+    public String welcome(Map<String, Object> model) {
+        model.put("message", "Hello World");
+        return "welcome";
+    }
 
     @GetMapping("/readJobs")
     public List<Job> readJobs(){
@@ -44,6 +52,9 @@ public class JobController {
         return  JobService.printDataTabular();
     }
 
+    @GetMapping("/filter")
+    public List<Job> filterData() { return JobService.filterData(); }
+
     @GetMapping("/countJobs")
     public List<Group> countJobsForCompany()
     {
@@ -60,8 +71,6 @@ public class JobController {
         StreamUtils.copy(imgFile.getInputStream(), response.getOutputStream());
     }
 
-
-
     @GetMapping(value = "/barplotjob",  produces = IMAGE_JPEG_VALUE)
     public void BarPlotJobs(HttpServletResponse response) throws IOException {
 
@@ -71,7 +80,6 @@ public class JobController {
         response.setContentType(IMAGE_JPEG_VALUE);
         StreamUtils.copy(imgFile.getInputStream(), response.getOutputStream());
     }
-
 
     @GetMapping(value = "/barplotarea",  produces = IMAGE_JPEG_VALUE)
     public void BarPlotAreas(HttpServletResponse response) throws IOException {
@@ -83,12 +91,14 @@ public class JobController {
         StreamUtils.copy(imgFile.getInputStream(), response.getOutputStream());
     }
 
+    @GetMapping("/countTitles")
+    public List<Group> getMostPopularTitles() { return JobService.getMostPopularTitles(); }
+
+    @GetMapping("/countAreas")
+    public List<Group> getMostPopularAreas() { return JobService.getMostPopularAreas(); }
 
     @GetMapping("/countSkills")
-    public List<Group> MostPopularSkills()
-    {
-        return JobService.mostRequiredSkill();
-    }
+    public List<Group> mostRequiredSkill() { return JobService.mostRequiredSkill(); }
 
 
 

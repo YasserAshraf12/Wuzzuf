@@ -1,5 +1,6 @@
 package org.iti.wuzzuf.POJO;
 
+
 public class Summary {
     String summary;
     String title;
