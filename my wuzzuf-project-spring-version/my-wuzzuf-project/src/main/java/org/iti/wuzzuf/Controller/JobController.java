@@ -1,6 +1,8 @@
 package org.iti.wuzzuf.Controller;
 
 import org.apache.log4j.lf5.util.StreamUtils;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.iti.wuzzuf.DAO.JobDaoImpl;
 import org.iti.wuzzuf.POJO.Group;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.List;
 
@@ -38,7 +41,7 @@ public class JobController {
     }
 
     @GetMapping("/job/structure")
-    public String [] showStructure(){
+    public String showStructure(){
         return JobService.showStructure();
     }
 
@@ -50,7 +53,7 @@ public class JobController {
     @GetMapping("/job/filter")
     public String filterData() { return JobService.filterData(); }
 
-    @GetMapping("/job/countJobs")
+    @GetMapping("/job/countCompaney")
     public String countJobsForCompany()
     {
         return JobService.countJobsForCompany();
@@ -87,12 +90,24 @@ public class JobController {
     }
 
     @GetMapping("/job/countTitles")
-    public List<Group> getMostPopularTitles() { return JobService.getMostPopularTitles(); }
+    public String getMostPopularTitles() { return JobService.getMostPopularTitles(); }
 
     @GetMapping("/job/countAreas")
-    public List<Group> getMostPopularAreas() { return JobService.getMostPopularAreas(); }
+    public String getMostPopularAreas() { return JobService.getMostPopularAreas(); }
 
     @GetMapping("/job/countSkills")
-    public List<Group> mostRequiredSkill() { return JobService.mostRequiredSkill(); }
+    public String mostRequiredSkill() { return JobService.mostRequiredSkill(); }
+/*
+    @GetMapping("/job/yearexp")
+    public void Factorize_year() { JobService.Factorize_column(); }
+*/
+
+   /* @GetMapping("/job/Kmean")
+    public void Kmean_model() { JobService.K_Means(); }
+*/
+
+
+
+
 
 }
