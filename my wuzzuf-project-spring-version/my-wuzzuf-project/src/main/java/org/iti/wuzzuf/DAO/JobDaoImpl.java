@@ -32,7 +32,7 @@ public class JobDaoImpl implements JobDao{
 
 
     @Override
-    public List<Job> readJobs() {
+    public String readJobs() {
 
         List<Job> jobs = new ArrayList<>();
 
@@ -58,13 +58,69 @@ public class JobDaoImpl implements JobDao{
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
-        return jobs;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+        String[] colnames = data.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+
+
+        for(Job job : jobs)
+        {
+            stringBuilder.append("<tr><td>" + job.getTitle() + "</td>");
+            stringBuilder.append("<td>" + job.getCompany() + "</td>");
+            stringBuilder.append("<td>" + job.getLocation() + "</td>");
+            stringBuilder.append("<td>" + job.getType() + "</td>");
+            stringBuilder.append("<td>" + job.getLevel() + "</td>");
+            stringBuilder.append("<td>" + job.getYearsExp() + "</td>");
+            stringBuilder.append("<td>" + job.getCountry() + "</td>");
+            stringBuilder.append("<td>" + job.getSkills() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
 
     @Override
-    public List<Summary> getDataSummary() {
+    public String getDataSummary() {
         List<Summary> summaries = data.describe().as(Encoders.bean(Summary.class)).collectAsList();
-        return summaries;
+        String [] colnames = data.describe().columns();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+        for(Summary summary : summaries)
+        {
+            stringBuilder.append("<tr><td>" + summary.getSummary() + "</td>");
+            stringBuilder.append("<td>" + summary.getTitle() + "</td>");
+            stringBuilder.append("<td>" + summary.getCompany() + "</td>");
+            stringBuilder.append("<td>" + summary.getLocation() + "</td>");
+            stringBuilder.append("<td>" + summary.getType() + "</td>");
+            stringBuilder.append("<td>" + summary.getLevel() + "</td>");
+            stringBuilder.append("<td>" + summary.getYearsExp() + "</td>");
+            stringBuilder.append("<td>" + summary.getCountry() + "</td>");
+            stringBuilder.append("<td>" + summary.getSkills() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
 
     @Override
@@ -73,9 +129,39 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public List<Job> printDataTabular() {
+    public String printDataTabular() {
         List<Job> df = data.as(Encoders.bean(Job.class)).collectAsList();
-        return df;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+        String[] colnames = data.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+
+
+        for(Job job : df)
+        {
+            stringBuilder.append("<tr><td>" + job.getTitle() + "</td>");
+            stringBuilder.append("<td>" + job.getCompany() + "</td>");
+            stringBuilder.append("<td>" + job.getLocation() + "</td>");
+            stringBuilder.append("<td>" + job.getType() + "</td>");
+            stringBuilder.append("<td>" + job.getLevel() + "</td>");
+            stringBuilder.append("<td>" + job.getYearsExp() + "</td>");
+            stringBuilder.append("<td>" + job.getCountry() + "</td>");
+            stringBuilder.append("<td>" + job.getSkills() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
+
     }
 
     @Override
@@ -89,14 +175,44 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public List<Job> filterData(){
+    public String filterData(){
         dropNullValues();
         dropDuplicates();
-        return data.as(Encoders.bean(Job.class)).collectAsList();
+        List<Job> df = data.as(Encoders.bean(Job.class)).collectAsList();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+        String[] colnames = data.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+
+
+        for(Job job : df)
+        {
+            stringBuilder.append("<tr><td>" + job.getTitle() + "</td>");
+            stringBuilder.append("<td>" + job.getCompany() + "</td>");
+            stringBuilder.append("<td>" + job.getLocation() + "</td>");
+            stringBuilder.append("<td>" + job.getType() + "</td>");
+            stringBuilder.append("<td>" + job.getLevel() + "</td>");
+            stringBuilder.append("<td>" + job.getYearsExp() + "</td>");
+            stringBuilder.append("<td>" + job.getCountry() + "</td>");
+            stringBuilder.append("<td>" + job.getSkills() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
 
     @Override
-    public List<Group> countJobsForCompany() {
+    public String countJobsForCompany() {
 
         data.createOrReplaceTempView ("Jobs_Data");
         Dataset<Row> df =  sparkSession.sql("select Company as alias, count(*) as frequency from Jobs_Data group by alias order by frequency desc");
@@ -109,7 +225,25 @@ public class JobDaoImpl implements JobDao{
             Row g = it.next();
             groups.add(new Group(g.getString(0), g.getLong(1)));
         }
-        return groups;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+        String[] colnames = df.columns();
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+        for (Group group : groups){
+            stringBuilder.append("<tr><td>" + group.getAlias() + "</td>");
+            stringBuilder.append("<td>" + group.getFrequency() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
 
     @Override

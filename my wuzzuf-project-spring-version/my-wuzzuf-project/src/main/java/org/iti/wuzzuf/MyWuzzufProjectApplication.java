@@ -1,14 +1,14 @@
 package org.iti.wuzzuf;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 @SpringBootApplication
 public class MyWuzzufProjectApplication{
-
 	public static void main(String[] args)
 	{
 		Logger.getLogger("org").setLevel(Level.OFF);
