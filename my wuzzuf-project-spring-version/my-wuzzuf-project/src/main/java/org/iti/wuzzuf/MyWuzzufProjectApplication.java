@@ -7,9 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-public class MyWuzzufProjectApplication {
+public class MyWuzzufProjectApplication{
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		Logger.getLogger("org").setLevel(Level.OFF);
 		Logger.getLogger("akka").setLevel(Level.OFF);
 		SpringApplication.run(MyWuzzufProjectApplication.class, args);

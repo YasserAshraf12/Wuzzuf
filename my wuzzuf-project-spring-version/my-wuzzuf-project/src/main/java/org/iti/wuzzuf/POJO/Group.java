@@ -1,28 +1,28 @@
 package org.iti.wuzzuf.POJO;
 
 public class Group {
-    String company;
+    String alias;
     long frequency;
 
     @Override
     public String toString() {
         return "Group{" +
-                "company='" + company + '\'' +
+                "alias='" + alias + '\'' +
                 ", frequency='" + frequency + '\'' +
                 '}';
     }
 
     public Group(String company, long frequency) {
-        this.company = company;
+        this.alias = company;
         this.frequency = frequency;
     }
 
-    public String getCompany() {
-        return company;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public long getFrequency() {

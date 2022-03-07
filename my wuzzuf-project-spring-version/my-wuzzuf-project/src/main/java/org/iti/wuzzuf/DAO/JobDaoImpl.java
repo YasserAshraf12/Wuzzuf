@@ -77,23 +77,27 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public List<Job> dropNullValues() {
-        return data.na().drop("any").as(Encoders.bean(Job.class)).collectAsList();
+    public void dropNullValues() {
+        data =  data.na().drop("any");
     }
 
     @Override
-    public List<Job> dropDuplicates() {
-        return data.dropDuplicates().as(Encoders.bean(Job.class)).collectAsList();
+    public void dropDuplicates() {
+        data = data.dropDuplicates();
+    }
+
+    @Override
+    public List<Job> filterData(){
+        dropNullValues();
+        dropDuplicates();
+        return data.as(Encoders.bean(Job.class)).collectAsList();
     }
 
     @Override
     public List<Group> countJobsForCompany() {
 
         data.createOrReplaceTempView ("Jobs_Data");
-        Dataset<Row> df =  sparkSession.sql("select Company as company, count(*) as frequency from Jobs_Data group by company order by frequency desc");
-
-        System.out.println(df.count());
-        df.show((int)df.count());
+        Dataset<Row> df =  sparkSession.sql("select Company as alias, count(*) as frequency from Jobs_Data group by alias order by frequency desc");
 
         List<Group> groups = new ArrayList<>();
 
@@ -127,10 +131,20 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public void getMostPopularTitles() {
+    public List<Group> getMostPopularTitles() {
 
         data.createOrReplaceTempView ("Jobs_Data");
-        sparkSession.sql("select Title, count(*) as Number_of_title from Jobs_Data group by Title order by Number_of_title desc").show(10);
+        Dataset<Row> df  = sparkSession.sql("select Title as alias, count(*) as frequency from Jobs_Data group by alias order by frequency desc");
+
+        List<Group> groups = new ArrayList<>();
+
+        Iterator<Row> it = df.toLocalIterator();
+        while (it.hasNext())
+        {
+            Row g = it.next();
+            groups.add(new Group(g.getString(0), g.getLong(1)));
+        }
+        return groups;
     }
 
     @Override
@@ -163,9 +177,19 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public void getMostPopularAreas() {
+    public List<Group> getMostPopularAreas() {
         data.createOrReplaceTempView ("Jobs_Data");
-        sparkSession.sql("select Location, count(*) as Number_of_area from Jobs_Data group by Location order by Number_of_area desc").show(10);
+        Dataset<Row> df = sparkSession.sql("select Location as alias, count(*) as frequency from Jobs_Data group by alias order by frequency desc");
+
+        List<Group> groups = new ArrayList<>();
+
+        Iterator<Row> it = df.toLocalIterator();
+        while (it.hasNext())
+        {
+            Row g = it.next();
+            groups.add(new Group(g.getString(0), g.getLong(1)));
+        }
+        return groups;
     }
 
     @Override
@@ -197,7 +221,7 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public void mostRequiredSkill() {
+    public List<Group> mostRequiredSkill() {
 
         data.createOrReplaceTempView ("Jobs_Data");
         List<Row> dt = sparkSession.sql("select Skills from Jobs_Data").collectAsList();
@@ -214,8 +238,16 @@ public class JobDaoImpl implements JobDao{
         Dataset<String> df_skills = sparkSession.createDataset(skills, Encoders.STRING());
 
         df_skills.createOrReplaceTempView ("Jobs_Skills");
-        Dataset<Row> result = sparkSession.sql("select value, count(*) as Number_of_Skills from Jobs_Skills group by value order by Number_of_Skills desc");
+        Dataset<Row> df = sparkSession.sql("select value as alias, count(*) as frequency from Jobs_Skills group by alias order by frequency desc");
 
-        result.show((int) result.count());
+        List<Group> groups = new ArrayList<>();
+
+        Iterator<Row> it = df.toLocalIterator();
+        while (it.hasNext())
+        {
+            Row g = it.next();
+            groups.add(new Group(g.getString(0), g.getLong(1)));
+        }
+        return groups;
     }
 }

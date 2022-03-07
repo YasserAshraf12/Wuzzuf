@@ -9,11 +9,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
+
 @RequestMapping("/job")
 public class JobController {
+
+
+
+    @RequestMapping("/")
+    public String welcome(Map<String, Object> model) {
+        model.put("message", "Hello World");
+        return "welcome";
+    }
 
     @GetMapping("/readJobs")
     public List<Job> readJobs(){
@@ -35,10 +45,22 @@ public class JobController {
         return new JobDaoImpl().printDataTabular();
     }
 
-    @GetMapping("countJobs")
+    @GetMapping("/filter")
+    public List<Job> filterData() { return new JobDaoImpl().filterData(); }
+
+    @GetMapping("/countJobs")
     public List<Group> countJobsForCompany()
     {
         return new JobDaoImpl().countJobsForCompany();
     }
+
+    @GetMapping("/countTitles")
+    public List<Group> getMostPopularTitles() { return new JobDaoImpl().getMostPopularTitles(); }
+
+    @GetMapping("/countAreas")
+    public List<Group> getMostPopularAreas() { return new JobDaoImpl().getMostPopularAreas(); }
+
+    @GetMapping("/countSkills")
+    public List<Group> mostRequiredSkill() { return new JobDaoImpl().mostRequiredSkill(); }
 
 }

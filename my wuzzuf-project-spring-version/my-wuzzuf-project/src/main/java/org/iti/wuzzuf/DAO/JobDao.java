@@ -9,18 +9,17 @@ import java.util.List;
 public interface JobDao {
 
     List<Job> readJobs();
+    List<Job> printDataTabular();
+    List<Job> filterData();
+    List<Group> countJobsForCompany();
+    List<Group> getMostPopularTitles();
+    List<Group> getMostPopularAreas();
+    List<Group> mostRequiredSkill();
     List<Summary> getDataSummary();
     void showStructure();
-    List<Job> printDataTabular();
-
-    List<Job> dropNullValues();
-    List<Job> dropDuplicates();
-    List<Group> countJobsForCompany();
-    void piePlot();
-    void getMostPopularTitles();
+    void dropNullValues();
+    void dropDuplicates();
     void barPlot();
-    void getMostPopularAreas();
+    void piePlot();
     void barPlotAreas();
-    void mostRequiredSkill();
-
 }
