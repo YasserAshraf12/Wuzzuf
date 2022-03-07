@@ -1,8 +1,5 @@
 package org.iti.wuzzuf.POJO;
 
-
-
-
 public class Job {
     String title;
     String company;
