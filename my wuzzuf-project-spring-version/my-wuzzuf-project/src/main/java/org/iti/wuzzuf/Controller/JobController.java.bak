@@ -96,7 +96,7 @@ public class JobController {
     public String mostRequiredSkill() { return JobService.mostRequiredSkill(); }
 
     @GetMapping("/job/yearexp")
-    public void Factorize_year() {  JobService.Factorize_column(); }
+    public String Factorize_year() { return JobService.Factorize_column(); }
 
 
 
