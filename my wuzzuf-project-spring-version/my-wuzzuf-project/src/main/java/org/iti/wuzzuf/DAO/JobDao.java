@@ -23,7 +23,7 @@ public interface JobDao {
     void piePlot() throws IOException;
     void barPlot() throws IOException;
     void barPlotAreas() throws IOException;
-    public void Factorize_column();
+    //public void Factorize_column();
     //public void K_Means();
 
 
