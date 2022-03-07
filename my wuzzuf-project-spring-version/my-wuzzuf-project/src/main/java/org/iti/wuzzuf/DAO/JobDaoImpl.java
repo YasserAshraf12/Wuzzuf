@@ -524,7 +524,7 @@ public class JobDaoImpl implements JobDao{
 
         data=indexer.fit(data).transform(data);
         data=data.drop("YearsExp");
-		data.show()
+		data.show();
 		
 
     }
