@@ -7,6 +7,7 @@ import org.iti.wuzzuf.POJO.Summary;
 import org.knowm.xchart.*;
 import org.knowm.xchart.style.Styler;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@Component
+@Service
 public class JobDaoImpl implements JobDao{
 
-    private final String filePath = "C:\\Users\\Top\\Desktop\\Wuzzuf_JavaML\\my wuzzuf-project-spring-version\\my-wuzzuf-project\\src\\main\\resources\\static\\Wuzzuf_Jobs.csv";
+    private final String filePath = "E:\\github\\Wuzzuf_JavaML\\Wuzzuf\\my wuzzuf-project-spring-version\\my-wuzzuf-project\\src\\main\\resources\\static\\Wuzzuf_Jobs.csv";
 
     private Dataset<Row> data = null;
 
@@ -65,10 +66,12 @@ public class JobDaoImpl implements JobDao{
         return summaries;
     }
 
+
     @Override
-    public void showStructure() {
-        data.printSchema();
+    public String[] showStructure() {
+        return data.schema().treeString().split("\\|");
     }
+
 
     @Override
     public List<Job> printDataTabular() {
