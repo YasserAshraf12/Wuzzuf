@@ -512,7 +512,7 @@ public class JobDaoImpl implements JobDao{
 
 
     @Override
-    public void Factorize_column()
+    public String Factorize_column()
     {
         data=data.withColumn("YearsExp", regexp_replace(col("YearsExp"), " Yrs of Exp", ""));
         data=data.withColumn("YearsExp", regexp_replace(col("YearsExp"), "null", "0"));
@@ -524,10 +524,110 @@ public class JobDaoImpl implements JobDao{
 
         data=indexer.fit(data).transform(data);
         data=data.drop("YearsExp");
-		data.show()
-		
+        data=data.withColumnRenamed("YearsExpIndex", "YearsExp");
+
+        List<Job> df = data.as(Encoders.bean(Job.class)).collectAsList();
+          df.forEach(S->System.out.println(S));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+        String[] colnames = data.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+
+
+        for(Job job : df)
+        {
+            stringBuilder.append("<tr><td>" + job.getTitle() + "</td>");
+            stringBuilder.append("<td>" + job.getCompany() + "</td>");
+            stringBuilder.append("<td>" + job.getLocation() + "</td>");
+            stringBuilder.append("<td>" + job.getType() + "</td>");
+            stringBuilder.append("<td>" + job.getLevel() + "</td>");
+            stringBuilder.append("<td>" + job.getCountry() + "</td>");
+            stringBuilder.append("<td>" + job.getSkills() + "</td>");
+            stringBuilder.append("<td>" + job.getYearsExp() + "</td>");
+
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
 
     }
+
+
+
+   /* @Override
+    public void K_Means()
+    {   Dataset <Row> train_data=data.select("Title","Company");
+        int numClusters = 5;
+        int numIterations = 50;
+        // Trains a k-means model.
+
+         String [] features =train_data.columns();
+         for (String name :features)
+         {
+             StringIndexer indexer = new StringIndexer()
+                     .setInputCol(name)
+                     .setOutputCol(name+"Index");
+
+             OneHotEncoderEstimator hot_estimator=new OneHotEncoderEstimator()
+
+
+             data=indexer.fit(data).transform(data);
+         }
+        OneHotEncoder encoder=new OneHotEncoder()
+                .setInputCol("Title")
+                .setOutputCol("Title_encod");
+
+
+        Dataset<Row> encoded = model.transform(df);
+        encoded.show();
+
+
+
+        VectorAssembler assembler = new VectorAssembler().setInputCols(cols).setOutputCol("features")
+        val featureDf = assembler.transform(uberDf)
+
+        featureDf.printSchema()
+        val kmeans = new KMeans()
+                .setK(8)
+                .setFeaturesCol("features")
+                .setPredictionCol("prediction")
+        val kmeansModel = kmeans.fit(trainingData)
+        kmeansModel.clusterCenters.foreach(println)
+
+
+
+
+
+        KMeans kmeans = new KMeans().setK(2).setSeed(1L);
+        KMeansModel model = kmeans.fit(train_data);
+        // Make predictions
+        Dataset<Row> predictions = model.transform(train_data);
+
+        // Evaluate clustering by computing Silhouette score
+        ClusteringEvaluator evaluator = new ClusteringEvaluator();
+
+        double silhouette = evaluator.evaluate(predictions);
+        System.out.println("Silhouette with squared euclidean distance = " + silhouette);
+
+        Vector[] centers = model.clusterCenters();
+        for (Vector center: centers) {
+            System.out.println(center);
+        }
+
+    }*/
+
+
+
+
 
 
 }
