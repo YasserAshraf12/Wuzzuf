@@ -4,6 +4,7 @@ public class Group {
     String alias;
     long frequency;
 
+
     @Override
     public String toString() {
         return "Group{" +

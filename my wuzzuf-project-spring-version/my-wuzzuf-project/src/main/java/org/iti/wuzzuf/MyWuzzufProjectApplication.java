@@ -15,4 +15,5 @@ public class MyWuzzufProjectApplication{
 		Logger.getLogger("akka").setLevel(Level.OFF);
 		SpringApplication.run(MyWuzzufProjectApplication.class, args);
 	}
+
 }
