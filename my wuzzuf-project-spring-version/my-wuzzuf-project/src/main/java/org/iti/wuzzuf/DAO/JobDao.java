@@ -10,7 +10,7 @@ public interface JobDao {
 
     List<Job> readJobs();
     List<Summary> getDataSummary();
-    void showStructure();
+    String [] showStructure();
     List<Job> printDataTabular();
 
     List<Job> dropNullValues();
