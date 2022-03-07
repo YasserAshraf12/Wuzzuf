@@ -1,5 +1,10 @@
 package org.iti.wuzzuf.DAO;
 
+import org.apache.spark.ml.clustering.KMeans;
+import org.apache.spark.ml.clustering.KMeansModel;
+import org.apache.spark.ml.evaluation.ClusteringEvaluator;
+import org.apache.spark.ml.feature.*;
+import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.sql.*;
 import org.iti.wuzzuf.POJO.Group;
 import org.iti.wuzzuf.POJO.Job;
@@ -13,13 +18,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.regexp_replace;
 
 @Service
 public class JobDaoImpl implements JobDao{
 
-    private final String filePath = "C:\\Users\\Top\\Desktop\\Wuzzuf_JavaML\\my wuzzuf-project-spring-version\\my-wuzzuf-project\\src\\main\\resources\\static\\Wuzzuf_Jobs.csv";
+    private final String filePath = "E:\\github\\Wuzzuf_JavaML\\Wuzzuf\\my wuzzuf-project-spring-version\\my-wuzzuf-project\\src\\main\\resources\\static\\Wuzzuf_Jobs.csv";
 
     private Dataset<Row> data = null;
     private SparkSession sparkSession = SparkSession.builder().appName ("Wuzzuf Jobs Demo").master("local[5]").getOrCreate();
@@ -124,8 +133,31 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public String[] showStructure() {
-        return data.schema().treeString().split("\\|");
+    public String showStructure() {
+        String[] data_structure=  data.schema().treeString().split("\\|--");
+
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+
+
+        stringBuilder.append("<th class='head'>Structure</th>");
+
+        stringBuilder.append("</tr>");
+        for(String column :data_structure)
+        {
+            stringBuilder.append("<tr><td>" + column + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
+
+
     }
 
     @Override
@@ -248,7 +280,7 @@ public class JobDaoImpl implements JobDao{
 
     @Override
     public void piePlot() throws IOException {
-        PieChart chart = new PieChartBuilder().width(800).height(600).title("Pie Chart").build();
+        PieChart chart = new PieChartBuilder().width(1000).height(800).title("Pie Chart").build();
         data.createOrReplaceTempView ("Jobs_Data");
 
         Dataset<Row> dt= sparkSession.sql("select cast(Company as string), cast(count(*) as int) as Number_of_jobs from Jobs_Data " +
@@ -272,7 +304,7 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public List<Group> getMostPopularTitles() {
+    public String getMostPopularTitles() {
 
         data.createOrReplaceTempView ("Jobs_Data");
         Dataset<Row> df  = sparkSession.sql("select Title as alias, count(*) as frequency from Jobs_Data group by alias order by frequency desc");
@@ -285,13 +317,38 @@ public class JobDaoImpl implements JobDao{
             Row g = it.next();
             groups.add(new Group(g.getString(0), g.getLong(1)));
         }
-        return groups;
+
+
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+
+        String[] colnames = df.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+
+        stringBuilder.append("</tr>");
+        for (Group group : groups){
+            stringBuilder.append("<tr><td>" + group.getAlias() + "</td>");
+            stringBuilder.append("<td>" + group.getFrequency() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
+
     }
 
     @Override
     public void barPlot() throws IOException {
 
-        CategoryChart chart = new CategoryChartBuilder().width(1700).height(800).title("Histogram").xAxisTitle("Title").yAxisTitle("Frequency").build();
+        CategoryChart chart = new CategoryChartBuilder().width(1000).height(800).title("Histogram").xAxisTitle("Title").yAxisTitle("Frequency").build();
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
         chart.getStyler().setHasAnnotations(true);
         chart.getStyler().setYAxisMin(0.0);
@@ -324,7 +381,7 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public List<Group> getMostPopularAreas() {
+    public String getMostPopularAreas() {
         data.createOrReplaceTempView ("Jobs_Data");
         Dataset<Row> df = sparkSession.sql("select Location as alias, count(*) as frequency from Jobs_Data group by alias order by frequency desc");
 
@@ -336,12 +393,34 @@ public class JobDaoImpl implements JobDao{
             Row g = it.next();
             groups.add(new Group(g.getString(0), g.getLong(1)));
         }
-        return groups;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+
+        String[] colnames = df.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+
+        stringBuilder.append("</tr>");
+        for (Group group : groups){
+            stringBuilder.append("<tr><td>" + group.getAlias() + "</td>");
+            stringBuilder.append("<td>" + group.getFrequency() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
 
     @Override
     public void barPlotAreas() throws IOException {
-        CategoryChart chart = new CategoryChartBuilder().width(1700).height(800).title("Histogram").xAxisTitle("Location").yAxisTitle("Frequency").build();
+        CategoryChart chart = new CategoryChartBuilder().width(1000).height(800).title("Histogram").xAxisTitle("Location").yAxisTitle("Frequency").build();
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
         chart.getStyler().setHasAnnotations(true);
         chart.getStyler().setYAxisMin(0.0);
@@ -375,7 +454,7 @@ public class JobDaoImpl implements JobDao{
     }
 
     @Override
-    public List<Group> mostRequiredSkill() {
+    public String mostRequiredSkill() {
 
         data.createOrReplaceTempView ("Jobs_Data");
         List<Row> dt = sparkSession.sql("select Skills from Jobs_Data").collectAsList();
@@ -402,7 +481,54 @@ public class JobDaoImpl implements JobDao{
             Row g = it.next();
             groups.add(new Group(g.getString(0), g.getLong(1)));
         }
-        return groups;
+
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+
+        String[] colnames = df.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+
+        stringBuilder.append("</tr>");
+        for (Group group : groups){
+            stringBuilder.append("<tr><td>" + group.getAlias() + "</td>");
+            stringBuilder.append("<td>" + group.getFrequency() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
+
+
+
+
+
+    @Override
+    public void Factorize_column()
+    {
+        Dataset<Row> data2= data.withColumn("YearsExp", regexp_replace(col("YearsExp"), " Yrs of Exp", ""));
+        data2=data2.withColumn("YearsExp", regexp_replace(col("YearsExp"), "null", "0"));
+
+        StringIndexer indexer = new StringIndexer()
+                .setInputCol("YearsExp")
+                .setOutputCol("YearsExpIndex");
+
+
+        data2=indexer.fit(data2).transform(data2);
+        data2=data2.drop("YearsExp");
+        data2=data2.withColumnRenamed("YearsExpIndex", "YearsExp");
+        data2.show();
+
+    }
+
+
 
 }

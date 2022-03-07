@@ -1,5 +1,7 @@
 package org.iti.wuzzuf.DAO;
 
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.iti.wuzzuf.POJO.Group;
 
 import java.io.IOException;
@@ -11,16 +13,18 @@ public interface JobDao {
     String printDataTabular();
     String filterData();
     String countJobsForCompany();
-    List<Group> getMostPopularTitles();
-    List<Group> getMostPopularAreas();
-    List<Group> mostRequiredSkill();
+    String getMostPopularTitles();
+    String getMostPopularAreas();
+    String mostRequiredSkill();
     String getDataSummary();
-    String [] showStructure();
+    String showStructure();
     void dropNullValues();
     void dropDuplicates();
     void piePlot() throws IOException;
     void barPlot() throws IOException;
     void barPlotAreas() throws IOException;
+    public void Factorize_column();
+    //public void K_Means();
 
 
 
