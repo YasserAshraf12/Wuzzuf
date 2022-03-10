@@ -510,23 +510,69 @@ public class JobDaoImpl implements JobDao{
 
 
 
-
     @Override
-    public void Factorize_column()
+    public String Factorize_column()
     {
         data=data.withColumn("YearsExp", regexp_replace(col("YearsExp"), " Yrs of Exp", ""));
         data=data.withColumn("YearsExp", regexp_replace(col("YearsExp"), "null", "0"));
 
         StringIndexer indexer = new StringIndexer()
                 .setInputCol("YearsExp")
-                .setOutputCol("YearsExpIndex");
+                .setOutputCol("YearsExp_index");
 
 
         data=indexer.fit(data).transform(data);
         data=data.drop("YearsExp");
-		data.show();
-		
+        data=data.withColumnRenamed("YearsExp_index","YearsExp");
+        Dataset<Row> data2=data.select("Title","Company","Location","Type","Level","YearsExp","Country","Skills");
+        List<Row> df = data2.collectAsList();
+        List<Job> jobs=new ArrayList<>();
 
+
+        for(Row row : df)
+        {
+            Job j = new Job();
+            j.setTitle(String.valueOf(row.get(0)));
+            j.setCompany(String.valueOf(row.get(1)));
+            j.setLocation(String.valueOf(row.get(2)));
+            j.setType(String.valueOf(row.get(3)));
+            j.setLevel(String.valueOf(row.get(4)));
+            j.setYearsExp(String.valueOf(row.get(5)));
+            j.setCountry(String.valueOf(row.get(6)));
+            j.setSkills(String.valueOf(row.get(7)));
+            jobs.add(j);
+        }
+        //jobs.forEach(j->System.out.println(j));
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>table, th, td {\n" +
+                "  border: 1px solid black; " +
+                "text-align: center; \n" +
+                "}" +
+                ".head{ background-color: black; color: white; }</style><h1>Welcome</h1></hr><table><tr>");
+        String[] colnames = data2.columns();
+
+        for(String name : colnames){
+            stringBuilder.append("<th class='head'>" + name + "</th>");
+        }
+        stringBuilder.append("</tr>");
+
+
+        for(Job job : jobs)
+        {
+            stringBuilder.append("<tr><td>" + job.getTitle() + "</td>");
+            stringBuilder.append("<td>" + job.getCompany() + "</td>");
+            stringBuilder.append("<td>" + job.getLocation() + "</td>");
+            stringBuilder.append("<td>" + job.getType() + "</td>");
+            stringBuilder.append("<td>" + job.getLevel() + "</td>");
+            stringBuilder.append("<td>" + job.getYearsExp() + "</td>");
+            stringBuilder.append("<td>" + job.getCountry() + "</td>");
+            stringBuilder.append("<td>" + job.getSkills() + "</td>");
+            stringBuilder.append("</tr>");
+        }
+        stringBuilder.append("</table>");
+
+        return stringBuilder.toString();
     }
 
 
