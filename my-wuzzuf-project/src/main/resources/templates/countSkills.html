@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Wuzzuf Jobs</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+
+<body>
+<div class="wrapper">
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h3>Wuzzuf Jobs</h3>
+        </div>
+        <ul class="list-unstyled components">
+            <p class="text-center">Analysis</p>
+            <li><a th:href="@{/job}">Home</a></li>
+            <li><a th:href="@{/job/readJobs}">Read Jobs</a></li>
+            <li><a th:href="@{/job/summary}">Summarize Data</a></li>
+            <li><a th:href="@{/job/structure}">Show Structure</a></li>
+            <li><a th:href="@{/job/filter}">Filter</a></li>
+            <li><a th:href="@{/job/countCompany}">Count Companies</a></li>
+            <li><a th:href=".">Count Skills</a></li>
+            <li><a th:href="@{/job/countTitles}">Count Titles</a></li>
+            <li><a th:href="@{/job/countAreas}">Count Areas</a></li>
+            <li><a th:href="@{/job/factorize}">Factorize Data</a></li>
+            <li><a th:href="@{/job/charts}">Charts and Analysis</a></li>
+
+        </ul>
+        <ul class="list-unstyled CTAs"><li><a th:href="@{/job}" class="article">Back to Home</a></li></ul>
+    </nav>
+    <div id="content">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" id="sidebarCollapse" class="navbar-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                </div>
+            </div>
+        </nav>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th scope="col">Alias</th>
+                <th scope="col">Frequency</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${counts.isEmpty}">
+                <td colspan="2"> No Jobs Available </td>
+            </tr>
+
+            <tr th:each="job : ${counts}">
+                <td th:text="${job.getAlias()}"></td>
+                <td th:text="${job.getFrequency()}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.nicescroll/3.7.6/jquery.nicescroll.min.js></script>
+
+<script th:inline="javascript">
+            $(document).ready(() => {
+                $("body").niceScroll();
+                $("#sidebarCollapse").on("click", function() {
+                    $("#sidebar").toggleClass("active");
+                    $(this).toggleClass("active");
+                });
+            });
+        </script>
+</body>
+</html>
